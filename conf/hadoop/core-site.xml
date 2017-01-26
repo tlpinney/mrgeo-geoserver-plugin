@@ -15,28 +15,26 @@
 -->
 
 <!-- Put site-specific property overrides in this file. -->
-
-<property>
-  <name>fs.s3.awsAccessKeyId</name>
-  <value>AWS_ACCESS_KEY_ID</value>
-</property>
-
-<property>
-  <name>fs.s3.awsSecretAccessKey</name>
-  <value>AWS_SECRET_ACCESS_KEY</value>
-</property>
-
-<property>
-  <name>fs.s3n.awsAccessKeyId</name>
-  <value>AWS_ACCESS_KEY_ID</value>
-</property>
-
-<property>
-  <name>fs.s3n.awsSecretAccessKey</name>
-  <value>AWS_SECRET_ACCESS_KEY</value>
-</property>
-
-
-
 <configuration>
+
+
+<property>
+  <name>fs.s3a.awsAccessKeyId</name>
+  <value>AWS_ACCESS_KEY_ID</value>
+</property>
+
+<property>
+  <name>fs.s3a.awsSecretAccessKey</name>
+  <value>AWS_SECRET_ACCESS_KEY</value>
+</property>
+
+
+<!--
+<property>
+  <name>fs.s3a.aws.credentials.provider</name>
+  <value>org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider</value>
+</property>
+-->
+
+
 </configuration>

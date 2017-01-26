@@ -4,11 +4,14 @@ FROM ubuntu:14.04
 ENV MRGEO_COMMON_HOME /usr/local/mrgeo
 ENV MRGEO_CONF_DIR /usr/local/mrgeo/conf
 ENV HADOOP_CONF_DIR /usr/local/hadoop/conf
-ENV GEOSERVER_DATA_DIR /mnt/geoserver-data
-ENV GEOWEBCACHE_CACHE_DIR /mnt/geoserver-cache
+#ENV GEOSERVER_DATA_DIR /mnt/geoserver-data
+#ENV GEOWEBCACHE_CACHE_DIR /mnt/geoserver-cache
 ENV CLASSPATH $MRGEO_COMMON_HOME:$MRGEO_CONF_DIR:$HADOOP_CONF_DIR
 
-ENV CATALINA_OPTS "-DMRGEO_COMMON_HOME=/usr/local/mrgeo -DMRGEO_CONF_DIR=/usr/local/hadoop/conf -DHADOOP_CONF_DIR=/usr/local/hadoop -DGEOSERVER_DATA_DIR=/mnt/geoserver-data  -DGEOWEBCACHE_CACHE_DIR=/mnt/geoserver-cache -Xms512m -Xmx4G -XX:NewSize=256m -XX:MaxNewSize=256m -XX:PermSize=256m -XX:MaxPermSize=256m -XX:+DisableExplicitGC"
+#ENV CATALINA_OPTS "-DMRGEO_COMMON_HOME=/usr/local/mrgeo -DMRGEO_CONF_DIR=/usr/local/hadoop/conf -DHADOOP_CONF_DIR=/usr/local/hadoop -DGEOSERVER_DATA_DIR=/mnt/geoserver-data  -DGEOWEBCACHE_CACHE_DIR=/mnt/geoserver-cache -Xms512m -Xmx4G -XX:NewSize=256m -XX:MaxNewSize=256m -XX:PermSize=256m -XX:MaxPermSize=256m -XX:+DisableExplicitGC"
+
+ENV CATALINA_OPTS "-DMRGEO_COMMON_HOME=/usr/local/mrgeo -DMRGEO_CONF_DIR=/usr/local/hadoop/conf -DHADOOP_CONF_DIR=/usr/local/hadoop -Xms512m -Xmx4G -XX:NewSize=256m -XX:MaxNewSize=256m -XX:PermSize=256m -XX:MaxPermSize=256m -XX:+DisableExplicitGC"
+
 
 ENV CATALINA_HOME /usr/local/tomcat
 ENV PATH $CATALINA_HOME/bin:/usr/local/apache-maven-3.3.9/bin:$PATH
@@ -58,13 +61,6 @@ RUN \
   cd /usr/local/src/mrgeo-geoserver-plugin && \
   mvn verify clean --fail-never
 
-COPY . /usr/local/src/mrgeo-geoserver-plugin
-
-# build mrgeo-geoserver-plugin
-RUN \
-  cd /usr/local/src/mrgeo-geoserver-plugin && \
-  mvn package
-
 RUN apt-get install unzip -y
 
 RUN \
@@ -78,21 +74,30 @@ RUN \
   rm geoserver.war
 
 
+COPY . /usr/local/src/mrgeo-geoserver-plugin
+
+# build mrgeo-geoserver-plugin
+RUN \
+  cd /usr/local/src/mrgeo-geoserver-plugin && \
+  mvn package -Penable-s3a
+
 RUN \
   mkdir -p $MRGEO_CONF_DIR && \
-  mkdir -p $GEOSERVER_DATA_DIR && \
-  mkdir -p $GEOWEBCACHE_CACHE_DIR && \
   mkdir -p $HADOOP_CONF_DIR
 
-COPY conf/mrgeo/mrgeo.conf $MRGEO_CONF_DIR
+COPY conf/mrgeo/mrgeo.conf $MRGEO_CONF_DIR/mrgeo.conf
 
-COPY conf/hadoop/* $HADOOP_CONF_DIR/
+COPY conf/hadoop/* $HADOOP_CONF_DIR/ 
 
 RUN \
   cd /usr/local/src/mrgeo-geoserver-plugin/target/gt-mrgeo-1.1-1.2.0-emr4.7.1-SNAPSHOT && \
   cp * /usr/local/tomcat/webapps/geoserver/WEB-INF/lib
 
 COPY conf/tomcat/* /usr/local/tomcat/conf/
+
+COPY conf/setenv.sh /usr/local/tomcat/bin
+
+COPY conf/mrgeo.config /usr/local/tomcat/webapps/geoserver/data
 
 EXPOSE 8080
 CMD ["catalina.sh", "run"]
