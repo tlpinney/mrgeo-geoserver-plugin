@@ -84,7 +84,7 @@ RUN \
   mkdir -p $GEOWEBCACHE_CACHE_DIR && \
   mkdir -p $HADOOP_CONF_DIR
 
-COPY conf/mrgeo/mrgeo.conf.example $MRGEO_CONF_DIR
+COPY conf/mrgeo/mrgeo.conf $MRGEO_CONF_DIR
 
 COPY conf/hadoop/* $HADOOP_CONF_DIR/
 
